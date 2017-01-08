@@ -1,0 +1,21 @@
+root1:
+  prop1: value1
+  prop2: 2
+
+root2:
+  - props:
+    - string1
+  - props:
+    - string2
+    - string3
+    - string4
+
+root3:
+  sub1:
+    sub2:
+      - props:
+          string5: 123
+          string6: 456
+  sub3:
+    prop: 
+      prop: string7
