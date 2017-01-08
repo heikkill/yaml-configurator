@@ -56,6 +56,14 @@ public class YamlConfigTest {
 		Assert.assertEquals(subBean.getProp(), "string7");
 	}
 	
+	@Test
+	public void configToBeansWithoutExtendedProcessedObjectTest() throws Exception {
+		YamlConfigReader reader = new YamlConfigReader(PKG_TEST_CLASSES);
+		InputStream is = getClass().getClassLoader().getResourceAsStream("test.yaml");
+		YamlConfig yamlConfig = reader.load(is);
+		Assert.assertEquals(yamlConfig.getProcessed().getAllResults().size(), 5);
+	}
+	
 	
 	@Test(expectedExceptions = { YamlNamespaceException.class })
 	public void namespaceHandlerMissingTest() throws Exception {

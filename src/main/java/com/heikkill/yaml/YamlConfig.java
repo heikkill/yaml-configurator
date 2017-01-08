@@ -1,5 +1,6 @@
 package com.heikkill.yaml;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,23 +61,39 @@ public class YamlConfig {
 	
 	public static class Processed {
 		
+		protected boolean handleAll = false;
 		protected Map<String, Provider<?>> providers = new HashMap<String, Provider<?>>();
+		protected List<Object> results = new ArrayList<Object>();
+		
+		public Processed() {
+		}
+		
+		public Processed(boolean handleAll) {
+			this.handleAll = handleAll;
+		}
 		
 		public void handleResult(Object result) {
+			if (result instanceof ProducesProviders) {
+				providers.putAll(((ProducesProviders)result).getProviders());
+			}
+			
 			if (result instanceof List) {
 				List<?> list = (List<?>) result;
 				for (Object item : list) {
 					handleResult(item);
 				}
 			}
-			else if (result instanceof ProducesProviders) {
-				providers.putAll(((ProducesProviders)result).getProviders());
+			else if (handleAll) {
+				results.add(result);
 			}
 		}
 		
 		public Provider<?> getProvider(Object valueId) {
 			return providers.get(valueId);
 		}
+		
+		public List<Object> getAllResults() {
+			return results;
+		}
 	}
-
 }

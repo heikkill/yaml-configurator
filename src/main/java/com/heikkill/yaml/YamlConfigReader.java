@@ -40,6 +40,18 @@ public class YamlConfigReader {
 		namespaceMappings = acquireNamespaceMappings(reflections);
 	}
 	
+	public YamlConfig load(InputStream is) throws Exception {
+		return load(is, new Processed(true));
+	}
+	
+	public YamlConfig load(String configStr) throws Exception {
+		return load(configStr, new Processed(true));
+	}
+	
+	public YamlConfig load(File configFile) throws Exception {
+		return load(configFile, new Processed(true));
+	}
+	
 	public YamlConfig load(InputStream is, Processed processed) throws Exception {
 		YamlConfig.Raw raw = om.readValue(is, YamlConfig.Raw.class);
 		return processConfig(raw, processed);
