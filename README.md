@@ -6,33 +6,16 @@ Yaml-configurator uses the [Jackson YAML extension](https://github.com/FasterXML
 
 ## Usage
 ### Namespace mappings
-Implement your beans representing parts of your YAML config file and provide a **YamlNamespaceMapping** for each bean. The mapping defines the namespace of the config file to handle, class of the produced bean and dependencies to other namespaces. The namespace corresponds to the structure of the YAML file using a dot as a delimiter.
+Implement your beans representing parts of your YAML config file and provide a **YamlNamespaceMapping** annotation for each bean. The mapping defines the namespace of the config file to handle and dependencies to other namespaces. The namespace corresponds to the structure of the YAML file using a dot as a delimiter.
 
 **Java:**
 ```java
+@YamlNamespaceMapping(namespace = Bean1.NAMESPACE, namespaceDependencies = {})
 public class Bean1 {
+	public static final String NAMESPACE = "root1.sub1";
+	
 	private String prop1;
 	private int prop2;
-
-	public static class Mapping implements YamlNamespaceMapping {
-		
-		public static final String NAMESPACE = "root1.sub1";
-
-		@Override
-		public Class<?> getProducedClass() {
-			return Bean1.class;
-		}
-
-		@Override
-		public String getNamespace() {
-			return NAMESPACE;
-		}
-
-		@Override
-		public List<String> getNamespaceDependencies() {
-			return null;
-		}
-	}
 }
 ```
 **Yaml:**
@@ -48,30 +31,12 @@ Data can be provided from one bean to another during the deserialization of a co
 
 A bean that expects data from other beans needs to define a list of namespace dependencies and a **Provider** field annotated with **@JacksonInject**:
 ```java
+@YamlNamespaceMapping(namespace = Bean2.NAMESPACE, namespaceDependencies = { Bean3.NAMESPACE })
 public class Bean2 {
+	public static final String NAMESPACE = "root2";
 	
 	@JacksonInject(value = "example")
 	private Provider<Integer> intProvider;
-
-	public static class Mapping implements YamlNamespaceMapping {
-		
-		public static final String NAMESPACE = "root2";
-
-		@Override
-		public Class<?> getProducedClass() {
-			return Bean2.class;
-		}
-
-		@Override
-		public String getNamespace() {
-			return NAMESPACE;
-		}
-
-		@Override
-		public List<String> getNamespaceDependencies() {
-			return Arrays.asList(Bean3.Mapping.NAMESPACE);
-		}
-	}
 }
 ```
 
@@ -115,7 +80,7 @@ Also worth noting is that discovered Provider objects are saved to and then late
 ## Example
 With a proper bean structure in place, simply instantiate a reader and read data from a file, string or input stream:
 ```java
-YamlConfigReader reader = new YamlConfigReader("my.package.of.namespace.mappings");
+YamlConfigReader reader = new YamlConfigReader("my.package.of.beans.to.scan");
 File file = new File("myconfig.yaml");
 YamlConfig yamlConfig = reader.load(file);
 ```
