@@ -1,10 +1,11 @@
 package com.heikkill.yaml.beans;
 
-import java.util.List;
+import com.heikkill.yaml.Annotations.YamlNamespaceMapping;
 
-import com.heikkill.yaml.YamlNamespaceMapping;
-
+@YamlNamespaceMapping(namespace = Bean1.NAMESPACE)
 public class Bean1 {
+	
+	public static final String NAMESPACE = "root1";
 	
 	private String prop1;
 	private int prop2;
@@ -23,25 +24,5 @@ public class Bean1 {
 
 	public void setProp2(int prop2) {
 		this.prop2 = prop2;
-	}
-
-	public static class Mapping implements YamlNamespaceMapping {
-		
-		public static final String NAMESPACE = "root1";
-
-		@Override
-		public Class<?> getProducedClass() {
-			return Bean1.class;
-		}
-
-		@Override
-		public String getNamespace() {
-			return NAMESPACE;
-		}
-
-		@Override
-		public List<String> getNamespaceDependencies() {
-			return null;
-		}
 	}
 }

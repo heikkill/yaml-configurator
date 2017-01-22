@@ -1,15 +1,16 @@
 package com.heikkill.yaml.beans;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import com.heikkill.yaml.Annotations.YamlNamespaceMapping;
 import com.heikkill.yaml.ProducesProviders;
 import com.heikkill.yaml.Provider;
-import com.heikkill.yaml.YamlNamespaceMapping;
 
+@YamlNamespaceMapping(namespace = Bean3.NAMESPACE)
 public class Bean3 implements ProducesProviders {
 	
+	public static final String NAMESPACE = "root3.sub1.sub2";
 	public static final String STUFF = "stuff";
 	
 	private Map<String, Integer> props; 
@@ -32,25 +33,5 @@ public class Bean3 implements ProducesProviders {
 
 	public void setProps(Map<String, Integer> props) {
 		this.props = props;
-	}
-
-	public static class Mapping implements YamlNamespaceMapping {
-		
-		public static final String NAMESPACE = "root3.sub1.sub2";
-
-		@Override
-		public Class<?> getProducedClass() {
-			return Bean3.class;
-		}
-
-		@Override
-		public String getNamespace() {
-			return NAMESPACE;
-		}
-
-		@Override
-		public List<String> getNamespaceDependencies() {
-			return null;
-		}
 	}
 }

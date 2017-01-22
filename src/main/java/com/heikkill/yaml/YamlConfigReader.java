@@ -16,15 +16,16 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.heikkill.yaml.Annotations.YamlNamespaceMapping;
 import com.heikkill.yaml.YamlConfig.Processed;
 
 public class YamlConfigReader {
 	
 	private ObjectMapper om = new ObjectMapper(new YAMLFactory());
-	private Map<String, YamlNamespaceMapping> namespaceMappings;
+	private Map<String, Mapping> namespaceMappings;
 	private List<String> handledNamespaces = new ArrayList<String>();
 	
-	public YamlConfigReader(Map<String, YamlNamespaceMapping> namespaceMappings) {
+	public YamlConfigReader(Map<String, Mapping> namespaceMappings) {
 		this.namespaceMappings = namespaceMappings;
 	}
 	
@@ -80,11 +81,12 @@ public class YamlConfigReader {
 		return config;
 	}
 
-	private Map<String, YamlNamespaceMapping> acquireNamespaceMappings(Reflections reflections) {
-		List<YamlNamespaceMapping> list = acquireInstances(reflections, YamlNamespaceMapping.class);
-		Map<String, YamlNamespaceMapping> map = new HashMap<String, YamlNamespaceMapping>();
-		for (YamlNamespaceMapping hb : list) {
-			map.put(hb.getNamespace(), hb);
+	private Map<String, Mapping> acquireNamespaceMappings(Reflections reflections) {
+		Map<String, Mapping> map = new HashMap<String, Mapping>();
+		Set<Class<?>> classes = reflections.getTypesAnnotatedWith(Annotations.YamlNamespaceMapping.class);
+		for (Class<?> c : classes) {
+			Mapping mapping = new Mapping(c);
+			map.put(mapping.namespace, mapping);
 		}
 		return map;
 	}
@@ -95,15 +97,15 @@ public class YamlConfigReader {
 		}
 		
 		if (namespaceMappings.containsKey(namespace)) {
-			YamlNamespaceMapping mapping = namespaceMappings.get(namespace);
-			if (mapping.getNamespaceDependencies() != null) {
-				for (String dependency : mapping.getNamespaceDependencies()) {
+			Mapping mapping = namespaceMappings.get(namespace);
+			if (mapping.namespaceDependencies != null) {
+				for (String dependency : mapping.namespaceDependencies) {
 					String[] newChain = createDependencyChain(namespaceDependencyChain, namespace);
 					handleNamespace(config, dependency, newChain);
 				}
 			}
 			
-			Object result = produce(config.getRaw().get(namespace),  namespaceMappings.get(namespace).getProducedClass());
+			Object result = produce(config.getRaw().get(namespace),  namespaceMappings.get(namespace).producedClass);
 			config.getProcessed().handleResult(result);
 			handledNamespaces.add(namespace);
 		}
@@ -158,16 +160,16 @@ public class YamlConfigReader {
 		om.setInjectableValues(injectable);
 	}
 	
-	private <E> List<E> acquireInstances(Reflections reflections, Class<E> clazz) {
-		Set<Class<? extends E>> classes = reflections.getSubTypesOf(clazz);
-		List<E> list = new ArrayList<E>();
-		for (Class<? extends E> c : classes) {
-			try {
-				list.add(c.newInstance());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+	private class Mapping {
+		Class<?> producedClass;
+		String namespace;
+		List<String> namespaceDependencies;
+		
+		public Mapping(Class<?> producedClass) {
+			this.producedClass = producedClass;
+			YamlNamespaceMapping yamlNamespaceMapping = producedClass.getAnnotation(Annotations.YamlNamespaceMapping.class);
+			this.namespace = yamlNamespaceMapping.namespace();
+			this.namespaceDependencies = Arrays.asList(yamlNamespaceMapping.namespaceDependencies());
 		}
-		return list;
 	}
 }

@@ -1,13 +1,15 @@
 package com.heikkill.yaml.beans;
 
-import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JacksonInject;
+import com.heikkill.yaml.Annotations.YamlNamespaceMapping;
 import com.heikkill.yaml.Provider;
-import com.heikkill.yaml.YamlNamespaceMapping;
 
+@YamlNamespaceMapping(namespace = Bean2.NAMESPACE, namespaceDependencies = { Bean3.NAMESPACE })
 public class Bean2 {
+	
+	public static final String NAMESPACE = "root2";
 	
 	@JacksonInject(value = Bean3.STUFF)
 	private Provider<Integer> injectedProvider;
@@ -24,25 +26,5 @@ public class Bean2 {
 	
 	public Provider<Integer> getInjectedProvider() {
 		return injectedProvider;
-	}
-
-	public static class Mapping implements YamlNamespaceMapping {
-		
-		public static final String NAMESPACE = "root2";
-
-		@Override
-		public Class<?> getProducedClass() {
-			return Bean2.class;
-		}
-
-		@Override
-		public String getNamespace() {
-			return NAMESPACE;
-		}
-
-		@Override
-		public List<String> getNamespaceDependencies() {
-			return Arrays.asList(Bean3.Mapping.NAMESPACE);
-		}
 	}
 }
